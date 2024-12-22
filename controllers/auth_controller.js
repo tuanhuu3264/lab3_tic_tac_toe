@@ -8,7 +8,7 @@ const JWT_SECRET =
 exports.login = async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
-  const user = await User.login(username, password);
+  const { user, token } = await User.login(username, password);
   if (user) {
     const payload = {
       userId: user.id,
@@ -17,6 +17,6 @@ exports.login = async (req, res) => {
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
     console.log(token);
     console.log(user);
-    res.redirect("/rooms");
+    return token;
   }
 };

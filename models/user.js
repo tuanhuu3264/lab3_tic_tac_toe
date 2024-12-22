@@ -56,6 +56,79 @@ class User {
       throw new Error("Login failed");
     }
   }
+  static async updateField(id, fieldName, newValue) {
+    try {
+      const query = `
+      UPDATE "User"
+      SET "${fieldName}" = $1
+      WHERE "id" = $2
+      RETURNING *;
+    `;
+      const result = await pool.query(query, [newValue, id]);
+
+      if (result.rowCount > 0) {
+        console.log("Successfully update", result.rows[0]);
+        return result.rows[0];
+      } else {
+        console.log("Not found id:", id);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error executing query:", error.message);
+      throw error;
+    }
+  }
+  static async getAllActivedUsersExceptId(id) {
+    const query = {
+      text: 'SELECT * FROM "User" WHERE "id" <> $1',
+      values: [id],
+    };
+
+    try {
+      const { rows } = await pool.query(query);
+
+      if (rows.length === 0) {
+        return null;
+      }
+      return rows;
+    } catch (err) {
+      console.error("Error executing query", err.stack);
+      throw new Error("Login failed");
+    }
+  }
+  static async getRankedUsers() {
+    const query = {
+      text: 'SELECT * FROM "User" ORDER BY "score" DESC LIMIT $1 OFFSET $2',
+      values: [10, 0],
+    };
+
+    try {
+      const { rows } = await pool.query(query);
+
+      if (rows.length === 0) {
+        return null;
+      }
+      return rows;
+    } catch (err) {
+      console.error("Error executing query", err.stack);
+      throw new Error("Login failed");
+    }
+  }
+  static async register(username, fullname, password) {
+    try {
+      const { rows } = await pool.query(
+        'INSERT INTO "User" (username, fullname, password) VALUES ($1, $2, $3) RETURNING *',
+        [username, fullname, password]
+      );
+      if (rows.length === 0) {
+        return null;
+      }
+      return rows[0];
+    } catch (err) {
+      console.error("Error executing query", err.stack);
+      throw new Error("Login failed");
+    }
+  }
 }
 
 module.exports = User;

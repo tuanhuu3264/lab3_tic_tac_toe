@@ -7,23 +7,21 @@ class Room {
     this.password = password;
   }
 
-  static async login(username, password) {
+  static async getAllRooms(username, password) {
     const query = {
-      text: "SELECT * FROM users WHERE username = $1 AND password = $2",
-      values: [username, password],
+      text: 'SELECT * FROM "Room"',
     };
-    pool.connect((err, client, release) => {
-      if (err) {
-        return console.error("Error acquiring client", err.stack);
+    try {
+      const { rows } = await pool.query(query);
+
+      if (rows.length === 0) {
+        return null;
       }
-      client.query(query, (err, result) => {
-        release();
-        if (err) {
-          return console.error("Error executing query", err.stack);
-        }
-        return result;
-      });
-    });
+      return rows;
+    } catch (err) {
+      console.error("Error executing query", err.stack);
+      throw new Error("Login failed");
+    }
   }
 }
 

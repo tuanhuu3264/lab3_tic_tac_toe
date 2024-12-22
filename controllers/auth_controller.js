@@ -9,6 +9,7 @@ exports.login = async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   const { user, token } = await User.login(username, password);
+  const update = await User.updateField(user.id, "is_active", true);
   if (user) {
     const payload = {
       userId: user.id,
@@ -19,4 +20,25 @@ exports.login = async (req, res) => {
     console.log(user);
     return token;
   }
+};
+
+exports.logout = async (req, res) => {
+  (req, res) => {};
+};
+
+exports.register = async (req, res) => {
+  const username = req.body.username;
+  const fullname = req.body.fullname;
+  const password = req.body.password;
+  const newUser = await User.register(username, fullname, password);
+  if (newUser) {
+    const payload = {
+      userId: newUser.id,
+      username: newUser.username,
+    };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
+    console.log(token);
+    console.log(newUser);
+    return token;
+  } else throw new Error("Register failed");
 };

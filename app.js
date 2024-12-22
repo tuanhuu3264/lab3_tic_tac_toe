@@ -55,6 +55,19 @@ app.post("/login", async (req, res) => {
   });
   res.redirect("/rooms");
 });
+app.get("/register", (req, res) => {
+  res.render("tie_tac_toe/register");
+});
+app.post("/register", async (req, res) => {
+  var token = await auth_controller.register(req, res);
+  res.cookie("jwt", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 3600000,
+  });
+  res.redirect("/rooms");
+});
 app.get("/rooms", authenticateJWT, (req, res) => {
   res.render("tie_tac_toe/waiting_room");
 });

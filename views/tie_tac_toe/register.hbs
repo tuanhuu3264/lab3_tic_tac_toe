@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<body>
+    <h1>Register to Tic Tac Toe</h1>
+
+    <form id="registerForm" action="/register" method="POST">
+        <label for="fullname">Fullname:</label>
+        <input type="text" id="fullname" name="fullname" required>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <a href="/login">Have you had a account?</a>
+        <button type="submit">Login</button>
+    </form>
+
+    {{#if message}}
+    <p>{{message}}</p>
+    {{/if}}
+
+</body>
+</html>

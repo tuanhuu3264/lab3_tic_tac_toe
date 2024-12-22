@@ -3,13 +3,13 @@
 <body>
     <h1>Login to Tic Tac Toe</h1>
 
-    <form action="/login" method="POST">
+    <form id="loginForm" action="/login" method="POST">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required>
 
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
-
+        <a href="/register" >Register</a>
         <button type="submit">Login</button>
     </form>
 
@@ -19,5 +19,31 @@
 
     <p><a href="/">Back to Home</a></p>
 </body>
+<script>
+    $('#loginForm').submit(function (e) {
+        e.preventDefault();
 
+        const username = $('#username').val();
+        const password = $('#password').val();
+
+        $.ajax({
+            type: 'POST',
+            url: '/login', 
+            data: {
+                username: username,
+                password: password
+            },
+            success: function (response) {
+                if (response.success) {
+                    window.location.href = '/rooms';  
+                } else {
+                    $('#message').html('<p>' + response.message + '</p>'); 
+                }
+            },
+            error: function (xhr, status, error) {
+                $('#message').html('<p>Something went wrong. Please try again.</p>'); 
+            }
+        });
+    });
+</script>
 </html>

@@ -78,10 +78,9 @@ class User {
       throw error;
     }
   }
-  static async getAllActivedUsersExceptId(id) {
+  static async getAllActivedUsers() {
     const query = {
-      text: 'SELECT * FROM "User" WHERE "id" <> $1',
-      values: [id],
+      text: 'SELECT * FROM "User" WHERE "is_active" = true',
     };
 
     try {
@@ -124,6 +123,24 @@ class User {
         return null;
       }
       return rows[0];
+    } catch (err) {
+      console.error("Error executing query", err.stack);
+      throw new Error("Login failed");
+    }
+  }
+  static async checkDuplicateUsername(username) {
+    const query = {
+      text: 'SELECT * FROM "User" WHERE "username"  ==  $1 ',
+      values: [username],
+    };
+
+    try {
+      const { rows } = await pool.query(query);
+
+      if (rows.length === 0) {
+        return false;
+      }
+      return true;
     } catch (err) {
       console.error("Error executing query", err.stack);
       throw new Error("Login failed");

@@ -22,12 +22,18 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.logout = async (req, res) => {
-  (req, res) => {};
+exports.logout = async (id) => {
+  const update = await User.updateField(id, "is_active", false);
+  return update;
 };
-
 exports.register = async (req, res) => {
   const username = req.body.username;
+  const usernameLowCase = username.toLowerCase();
+
+  const flag = await User.checkUsername(usernameLowCase);
+  if (flag) {
+    throw new Error("Username already exists");
+  }
   const fullname = req.body.fullname;
   const password = req.body.password;
   const newUser = await User.register(username, fullname, password);
@@ -41,4 +47,8 @@ exports.register = async (req, res) => {
     console.log(newUser);
     return token;
   } else throw new Error("Register failed");
+};
+exports.allOnlineUsers = async (req, res) => {
+  const users = await User.getAllActivedUsers();
+  return users;
 };

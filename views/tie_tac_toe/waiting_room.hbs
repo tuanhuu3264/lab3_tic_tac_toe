@@ -4,47 +4,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Waiting Rooms</title>
-    <style>
-            body {
-            display: flex;
-            margin: 0;
-            padding: 0;
-        }
-
-        .sidebar {
-            width: 250px;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-
-        .content {
-            flex-grow: 1;
-            padding: 20px;
-        }
-
-        a {
-            text-decoration: none;
-            color: blue;
-        }
-    </style>
+    <title>Game Home</title>
+    <link rel="stylesheet" href="/styles/styles.css">
 </head>
 
 <body>
-    <div class="sidebar">
-        <h1>Sidebar</h1>
-        <p>Additional content can go here.</p>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/rooms">Home</a></li>
+                <li><a href="/create-rooms">Create Table</a></li>
+                <li><a href="/leaderboard">Leaderboard</a></li>
+                <li><a href="/ranked-player">Ranked Player</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <h3>Online Users</h3>
+            <ul>
+                {{#each onlineUsers}}
+                <li>{{this.username}}</li>
+                {{else}}
+                <li>No users online</li>
+                {{/each}}
+            </ul>
+        </div>
+
+        <div class="game-tables">
+            <h3>Game Tables</h3>
+            <ul>
+                {{#each gameTables}}
+                <li>Table {{this.table_id}} - {{this.status}}</li>
+                {{else}}
+                <li>No tables available</li>
+                {{/each}}
+            </ul>
+        </div>
+
+        <div class="chat-box">
+            <h3>Chat</h3>
+            <div class="chat-box" id="chat-box">
+              
+            </div>
+            <form action="/send-message" method="POST">
+                <textarea name="message" placeholder="Type a message..." required></textarea>
+                <button type="submit">Send</button>
+            </form>
+            <div class="messages">
+                {{#each chatMessages}}
+                <p>{{this.username}}: {{this.message}}</p>
+                {{/each}}
+            </div>
+        </div>
     </div>
 
-    <div class="content">
-        <h1>Waiting Rooms</h1>
-
-        {{#if message}}
-        <p>{{message}}</p>
-        {{/if}}
-
-        <p><a href="/">Back to Home</a></p>
-    </div>
+    <footer>
+        <p>&copy; 2024 Game Server</p>
+    </footer>
 </body>
+<style>
+    body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
 
+header {
+  background-color: #333;
+  padding: 10px;
+  text-align: center;
+}
+
+header nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+header nav ul li {
+  display: inline;
+  margin: 0 10px;
+}
+
+header nav ul li a {
+  color: white;
+  text-decoration: none;
+}
+
+.main-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.sidebar, .game-tables, .chat-box {
+  width: 30%;
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+
+.sidebar ul, .game-tables ul {
+  list-style: none;
+  padding: 0;
+}
+
+.chat-box form textarea {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 10px;
+}
+
+footer {
+  text-align: center;
+  padding: 10px;
+  background-color: #333;
+  color: white;
+}
+</style>
 </html>

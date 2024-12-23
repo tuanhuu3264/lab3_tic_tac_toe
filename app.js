@@ -10,6 +10,7 @@ var cookieParser = require("cookie-parser");
 var expressSession = require("express-session");
 const jwt = require("jsonwebtoken");
 const real_chat_controller = require("./controllers/real_chat_controller");
+const room_controller = require("./controllers/room_controller");
 const app = express();
 app.engine(".hbs", engine({ defaultLayout: "layout", extname: ".hbs" }));
 app.set("views", path.join(__dirname, "views"));
@@ -107,7 +108,37 @@ app.post("/register", async (req, res) => {
 });
 app.get("/rooms", authenticateJWT, async (req, res) => {
   const onlineUsers = await auth_controller.allOnlineUsers(req, res);
-  res.render("tie_tac_toe/waiting_room", { onlineUsers });
+  const rooms = await room_controller.getAllRooms(req, res);
+  console.log("rooms " + rooms);
+  res.render("tie_tac_toe/waiting_room", {
+    onlineUsers: onlineUsers,
+    gameTables: rooms,
+  });
+});
+app.get("/create-rooms", authenticateJWT, async (req, res) => {
+  res.render("tie_tac_toe/create_table");
+});
+app.post("/create-rooms", authenticateJWT, async (req, res) => {
+  var { message, status, room } = await room_controller.createRoom(req, res);
+  if (!room) {
+    res.redirect("/create-rooms", { message: "Create room failed" });
+  }
+  if (status != 200) {
+    res.render("tie_tac_toe/create_table", { message: message });
+    return;
+  }
+  res.redirect("/rooms/game/" + room.id);
+});
+app.get("/rooms/game/:id", authenticateJWT, async (req, res) => {
+  res.render("tie_tac_toe/play");
+});
+app.get("/leaderboard", authenticateJWT, async (req, res) => {
+  var room = await room_controller.getRoomByUsername(req, res);
+  if (room) {
+    res.redirect("/rooms/game/" + room.id);
+    return;
+  }
+  res.render("tie_tac_toe/leader_board", { message: "You don't have a room" });
 });
 app.get("/logout", authenticateJWT, async (req, res) => {
   const token = req.cookies.jwt;

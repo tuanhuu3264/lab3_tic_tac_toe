@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Game Table</title>
+    <link rel="stylesheet" href="/styles/styles.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/rooms">Home</a></li>
+                <li><a href="/create-rooms">Create Table</a></li>
+                <li><a href="/leaderboard">Leaderboard</a></li>
+                <li><a href="/ranked-player">Ranked Player</a></li>
+                <li><a href="/profile">Profile</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="main-container">
+        <div class="game-tables">
+            <h3>Create Tic Tac Toe Table</h3>
+            <p style="color:red">{{message}}</p>
+            <form id="create-board-form" action="/create-rooms" method="POST">
+                <label for="size">Select Board Size:</label>
+                <select id="size" name="board-size" required>
+                    <option value="3">3x3</option>
+                    <option value="4">4x4</option>
+                </select>
+
+                <label for="type">Select Board Type:</label>
+                <select id="type" name="board-type" required>
+                    <option value="green">Green</option>
+                    <option value="brown">Brown</option>
+                    <option value="gray">Gray</option>
+                </select>
+
+                <button type="submit">Create Table</button>
+            </form>
+             <button type="button" id="preview-btn">Preview</button>
+
+            <div class="preview-container">
+                <h4>Preview</h4>
+                <div class="board-preview" id="board-preview"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Game Tic Tac Toe</p>
+    </footer>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            padding: 10px;
+            text-align: center;
+        }
+
+        header nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        header nav ul li {
+            display: inline;
+            margin: 0 10px;
+        }
+
+        header nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .sidebar,
+        .game-tables,
+        .chat-box {
+            width: 30%;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+
+        .sidebar ul,
+        .game-tables ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .chat-box form textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+        }
+
+        .preview-container {
+            margin-top: 20px;
+        }
+
+        .board-preview {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #000;
+            display: grid;
+            place-items: center;
+        }
+    </style>
+
+    <script>
+        document.getElementById("preview-btn").addEventListener("click", function () {
+            const boardSize = document.getElementById("size").value;
+            const boardType = document.getElementById("type").value;
+            const previewDiv = document.getElementById("board-preview");
+
+            previewDiv.innerHTML = ''; 
+            previewDiv.style.display = "grid";
+            previewDiv.style.gridTemplateColumns = `repeat(${boardSize}, 30px)`;
+            previewDiv.style.gridTemplateRows = `repeat(${boardSize}, 30px)`;
+            previewDiv.style.gap = "0px"; 
+
+            for (let i = 0; i < boardSize * boardSize; i++) {
+                const cell = document.createElement("div");
+                cell.style.width = "30px";
+                cell.style.height = "30px";
+                cell.style.border = "1px solid #000";
+                cell.style.backgroundColor = boardType;
+                previewDiv.appendChild(cell);
+            }
+        });
+    </script>
+</body>
+
+</html>

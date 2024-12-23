@@ -38,7 +38,7 @@
             <h3>Game Tables</h3>
             <ul>
                 {{#each gameTables}}
-                <li>Table {{this.table_id}} - {{this.status}}</li>
+                <li>Table {{this.id}} - {{#if this.is_playing}}playing{{else}}waiting{{/if}}</li>
                 {{else}}
                 <li>No tables available</li>
                 {{/each}}

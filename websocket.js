@@ -15,13 +15,25 @@ function startWebSocketServer(app) {
     console.log("client [%s] connected", client_uuid);
 
     ws.on("message", function (message) {
-      console.log("received: %s", message);
       const datadata = JSON.parse(message);
       const content = datadata.message;
       const username = datadata.username;
       console.log(content);
       console.log(username);
-      handleMessage(content, username, client_uuid, nickname, clients);
+      const kind = datadata.kind;
+      if (kind === "world")
+        broadcastMessage(content, username, client_uuid, nickname, clients);
+      else if (kind === "room") {
+        const roomId = datadata.roomId;
+        broadcastMessageRoom(
+          roomId,
+          content,
+          username,
+          client_uuid,
+          nickname,
+          clients
+        );
+      }
     });
 
     ws.on("close", function () {
@@ -31,10 +43,6 @@ function startWebSocketServer(app) {
 
   return wss;
 }
-
-function handleMessage(content, username, client_uuid, nickname, clients) {
-  broadcastMessage(content, username, client_uuid, nickname, clients);
-}
 function broadcastMessage(content, username, client_uuid, nickname, clients) {
   for (let client of clients) {
     const clientSocket = client.ws;
@@ -43,6 +51,30 @@ function broadcastMessage(content, username, client_uuid, nickname, clients) {
         JSON.stringify({
           id: client_uuid,
           username: username,
+          type: "world",
+          message: content,
+        })
+      );
+    }
+  }
+}
+function broadcastMessageRoom(
+  roomId,
+  content,
+  username,
+  client_uuid,
+  nickname,
+  clients
+) {
+  for (let client of clients) {
+    const clientSocket = client.ws;
+    if (clientSocket.readyState === WebSocket.OPEN) {
+      clientSocket.send(
+        JSON.stringify({
+          id: client_uuid,
+          username: username,
+          type: "room",
+          roomId: roomId,
           message: content,
         })
       );

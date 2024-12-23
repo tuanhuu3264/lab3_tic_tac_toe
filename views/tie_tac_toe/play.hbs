@@ -35,16 +35,16 @@
             <script src="main.js"></script>
         </div>
         <div class="chat-box">
-            <h3>Table Chat</h3>
-            <div class="chat-box" id="chat-box">
+            <h3>World Chat</h3>
+            <div class="chat-history" id="chat-box-room">
                 {{#each chatMessages}}
-                <p>{this.createdAt}-{{this.username}}: {{this.message}}</p>
+                <p><span class="chat-time">{{this.createdAt}}</span> - <span class="chat-user">{{this.username}}</span>:
+                    {{this.message}}</p>
                 {{/each}}
             </div>
-            <textarea id="message" name="message" placeholder="Type a message..." required></textarea>
-            <button id="submit-chat" type="submit">Send</button>
-            <div class="messages">
-        
+            <div class="chat-input">
+                <textarea id="message-room" name="message" placeholder="Type a message..." required></textarea>
+                <button id="submit-chat-room" type="submit">Send</button>
             </div>
         </div>
     </div>
@@ -81,57 +81,159 @@
             color: white;
             text-decoration: none;
         }
+.main-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px;
+    gap: 30px;
+    flex-wrap: wrap; 
+}
+.game-tables {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 650px;
+    text-align: center;
+}
 
-        .main-container {
-            display: flex;
-            justify-content: space-between;
-            padding: 20px;
-        }
+.game-tables h1 {
+    color: #333;
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto;
+    border: 3px solid #333;
+    border-radius: 5px;
+}
 
-        .sidebar,
-        .game-tables,
-        .chat-box {
-            width: 30%;
-            padding: 20px;
-            border: 1px solid #ccc;
-        }
+.board div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    background-color: #f1f1f1;
+    border: 2px solid #ccc;
+    cursor: pointer;
+}
 
-        .sidebar ul,
-        .game-tables ul {
-            list-style: none;
-            padding: 0;
-        }
+.reset {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
 
-        .chat-box form textarea {
-            width: 100%;
-            height: 100px;
-            margin-bottom: 10px;
-        }
+.reset:hover {
+    background-color: #0056b3;
+}
+.chat-box {
+    padding: 20px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    width: 350px;
+    height: 450px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
 
-        footer {
-            text-align: center;
-            padding: 10px;
-            background-color: #333;
-            color: white;
-        }
+.chat-box h3 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+}
 
-        .preview-container {
-            margin-top: 20px;
-        }
+.chat-history {
+    flex-grow: 1;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #333;
+}
 
-        .board-preview {
-            width: 100%;
-            height: 200px;
-            border: 1px solid #000;
-            display: grid;
-            place-items: center;
-        }
+.chat-history p {
+    margin: 5px 0;
+    padding: 3px;
+}
+
+.chat-history .chat-time {
+    font-size: 12px;
+    color: #999;
+}
+
+.chat-history .chat-user {
+    font-weight: bold;
+    color: #0066cc;
+}
+
+.chat-input {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chat-input textarea {
+    width: 100%;
+    height: 60px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    color: #333;
+    resize: none;
+}
+
+.chat-input button {
+    align-self: flex-end;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.chat-input button:hover {
+    background-color: #0056b3;
+}
+
+.chat-input button:disabled {
+    background-color: #bbb;
+    cursor: not-allowed;
+}
+
+
     </style>
 </body>
 <script>
-    const chatBox = document.getElementById("chat-box");
-    const messageInput = document.getElementById("message");
-    const sendBtn = document.getElementById("submit-chat");
+    const chatBox = document.getElementById("chat-box-room");
+    const messageInput = document.getElementById("message-room");
+    const sendBtn = document.getElementById("submit-chat-room");
+
+    const pathParts = window.location.pathname.split('/');
+    const roomId = pathParts[pathParts.length - 1];
 
     const allCookies = document.cookie;
     const cookiesArray = allCookies.split('; ').reduce((acc, cookie) => {
@@ -149,7 +251,7 @@
 
     const ws = new WebSocket(`ws://localhost:5000/`);
 
-    ws.onopen = function (e) {
+    ws.onopen = function () {
         console.log('Connection to server opened');
         ws.send(JSON.stringify({ type: "authenticate", token: token }));
     };
@@ -157,16 +259,22 @@
     ws.onmessage = (e) => {
         const data = JSON.parse(e.data);
         console.log("Message from server:", data);
-        if (data.username && data.message)
+        if (data.username && data.message && data.type === "room" && data.roomId === roomId) {
             appendLog(data.username, data.message);
+        }
     };
-    ws.onclose = function (e) {
+
+    ws.onclose = function () {
         appendLog("*", "Connection closed");
         console.log("Connection closed");
     };
 
+    ws.onerror = function (e) {
+        console.error("WebSocket error:", e);
+    };
+
     function appendLog(username, message) {
-        const messages = document.getElementById('chat-box');
+        const messages = document.getElementById('chat-box-room');
         const messageElem = document.createElement("div");
         const messageText = `<p>${username}: ${message}</p>`;
         messageElem.innerHTML = messageText;
@@ -174,15 +282,17 @@
     }
 
     function sendMessage() {
-        const messageField = document.getElementById('message');
-        const messageContent = messageField.value.trim();
+        const messageField = document.getElementById('message-room');
+        const messageContent = messageField.value;
 
         if (ws.readyState === WebSocket.OPEN && messageContent) {
             console.log("Sending message: %s", messageContent);
             ws.send(JSON.stringify({
                 type: "message",
+                roomId: roomId,
                 username: username,
-                message: messageContent
+                message: messageContent,
+                kind: "room"
             }));
         }
 
@@ -190,7 +300,10 @@
         messageField.focus();
     }
 
-    sendBtn.addEventListener('click', sendMessage);
+    sendBtn.addEventListener('click', function (event) {
+        event.preventDefault(); 
+        sendMessage();
+    });
 
     messageInput.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') {
@@ -198,4 +311,5 @@
         }
     });
 </script>
+
 </html>

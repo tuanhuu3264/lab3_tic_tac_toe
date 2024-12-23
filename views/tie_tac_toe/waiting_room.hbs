@@ -339,7 +339,7 @@ footer {
     ws.onmessage = (e) => {
         const data = JSON.parse(e.data);
         console.log("Message from server:", data);
-        if(data.username && data.message)
+        if(data.username && data.message  && data.type === "world")
         appendLog(data.username, data.message);
     };
     ws.onclose = function (e) {
@@ -364,7 +364,8 @@ footer {
             ws.send(JSON.stringify({
                 type: "message",
                 username: username,
-                message: messageContent
+                message: messageContent,
+                kind: "world"
             }));
         }
 

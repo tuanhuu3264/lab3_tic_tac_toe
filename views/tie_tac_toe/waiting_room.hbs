@@ -43,13 +43,13 @@
                 {{#each gameTables}}
                 <div class="table-item">
                     <div class="table-info">
-                        <p>Table {{this.id}} -
+                        <a href="/rooms/game/{{this.id}}">Table {{this.id}} -
                             {{#if this.is_playing}}
                             <span class="status playing">Playing</span>
                             {{else}}
                             <span class="status waiting">Waiting</span>
                             {{/if}}
-                        </p>
+                        </a>
                     </div>
                 </div>
                 {{else}}

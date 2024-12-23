@@ -130,7 +130,12 @@ app.post("/create-rooms", authenticateJWT, async (req, res) => {
   res.redirect("/rooms/game/" + room.id);
 });
 app.get("/rooms/game/:id", authenticateJWT, async (req, res) => {
-  res.render("tie_tac_toe/play");
+  var room = await room_controller.getRoomByUsername(req, res);
+  if (room && room.id == req.params.id) {
+    res.render("tie_tac_toe/play", { isOwner: true, room: room });
+    return;
+  }
+  res.render("tie_tac_toe/play", { isOwner: false, room: room });
 });
 app.get("/leaderboard", authenticateJWT, async (req, res) => {
   var room = await room_controller.getRoomByUsername(req, res);

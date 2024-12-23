@@ -16,6 +16,7 @@
                 <li><a href="/create-rooms">Create Table</a></li>
                 <li><a href="/leaderboard">Leaderboard</a></li>
                 <li><a href="/ranked-player">Ranked Player</a></li>
+                <li><a href="/profile">Profile</a></li>
                 <li><a href="/logout">Logout</a></li>
             </ul>
         </nav>
@@ -45,24 +46,22 @@
         </div>
 
         <div class="chat-box">
-            <h3>Chat</h3>
+            <h3>World Chat</h3>
             <div class="chat-box" id="chat-box">
-              
+            {{#each chatMessages}}
+            <p>{this.createdAt}-{{this.username}}: {{this.message}}</p>
+            {{/each}}
             </div>
-            <form action="/send-message" method="POST">
-                <textarea name="message" placeholder="Type a message..." required></textarea>
-                <button type="submit">Send</button>
-            </form>
+                <textarea id="message" name="message" placeholder="Type a message..." required></textarea>
+                <button id="submit-chat" type="submit">Send</button>
             <div class="messages">
-                {{#each chatMessages}}
-                <p>{{this.username}}: {{this.message}}</p>
-                {{/each}}
+               
             </div>
         </div>
     </div>
 
     <footer>
-        <p>&copy; 2024 Game Server</p>
+        <p>&copy; 2024 Game Tic Tac Toe</p>
     </footer>
 </body>
 <style>
@@ -123,4 +122,74 @@ footer {
   color: white;
 }
 </style>
+<script>
+   const chatBox = document.getElementById("chat-box");
+    const messageInput = document.getElementById("message");
+    const sendBtn = document.getElementById("submit-chat");
+
+    const allCookies = document.cookie;
+    const cookiesArray = allCookies.split('; ').reduce((acc, cookie) => {
+        const [key, value] = cookie.split('=');
+        acc[key] = value;
+        return acc;
+    }, {});
+    const token = cookiesArray['jwt'];
+    const username = cookiesArray['username'];
+
+    if (!token) {
+        alert("Token không tồn tại. Vui lòng đăng nhập.");
+        window.location.href = "/login";
+    }
+
+    const ws = new WebSocket(`ws://localhost:5000/`);
+
+    ws.onopen = function (e) {
+        console.log('Connection to server opened');
+        ws.send(JSON.stringify({ type: "authenticate", token: token }));
+    };
+
+    ws.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        console.log("Message from server:", data);
+        if(data.username && data.message)
+        appendLog(data.username, data.message);
+    };
+    ws.onclose = function (e) {
+        appendLog("*", "Connection closed");
+        console.log("Connection closed");
+    };
+
+    function appendLog(username, message) {
+        const messages = document.getElementById('chat-box');
+        const messageElem = document.createElement("div");
+        const messageText = `<p>${username}: ${message}</p>`;
+        messageElem.innerHTML = messageText;
+        messages.appendChild(messageElem);
+    }
+
+    function sendMessage() {
+        const messageField = document.getElementById('message');
+        const messageContent = messageField.value.trim();
+
+        if (ws.readyState === WebSocket.OPEN && messageContent) {
+            console.log("Sending message: %s", messageContent);
+            ws.send(JSON.stringify({
+                type: "message",
+                username: username,
+                message: messageContent
+            }));
+        }
+
+        messageField.value = '';
+        messageField.focus();
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+
+    messageInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+</script>
 </html>

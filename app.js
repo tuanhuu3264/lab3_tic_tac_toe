@@ -9,7 +9,7 @@ const auth_controller = require("./controllers/auth_controller");
 var cookieParser = require("cookie-parser");
 var expressSession = require("express-session");
 const jwt = require("jsonwebtoken");
-
+const real_chat_controller = require("./controllers/real_chat_controller");
 const app = express();
 app.engine(".hbs", engine({ defaultLayout: "layout", extname: ".hbs" }));
 app.set("views", path.join(__dirname, "views"));
@@ -24,7 +24,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
-
+const startWebSocketServer = require("./websocket");
+startWebSocketServer(app);
 var pg = require("pg");
 const config = {
   user: "wad2231iad4_owner",
@@ -42,28 +43,48 @@ pool = new pg.Pool(config);
 
 app.use(passport.initialize());
 
-const authenticateJWT = passport.authenticate("jwt", { session: false });
+const authenticateJWT = passport.authenticate("jwt", {
+  session: false,
+  resave: false,
+  saveUninitialized: true,
+});
 
 app.get("/login", (req, res) => {
   res.render("tie_tac_toe/login");
 });
 app.post("/login", async (req, res) => {
-  var token = await auth_controller.login(req, res);
-  res.cookie("jwt", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 3600000,
-  });
-  res.redirect("/rooms");
+  var { token, username } = await auth_controller.login(req, res);
+  if (token) {
+    res.cookie("username", token, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 3600000,
+    });
+    res.cookie("username", username, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 3600000,
+    });
+    res.redirect("/rooms");
+    return;
+  }
+  res.redirect("/login", { message: "Wrong username or password" });
 });
 app.get("/register", (req, res) => {
   res.render("tie_tac_toe/register");
 });
 app.post("/register", async (req, res) => {
-  var token = await auth_controller.register(req, res);
+  var { token, username } = await auth_controller.register(req, res);
   res.cookie("jwt", token, {
-    httpOnly: true,
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 3600000,
+  });
+  res.cookie("username", username, {
+    httpOnly: false,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     maxAge: 3600000,
@@ -86,13 +107,19 @@ app.get("/logout", authenticateJWT, async (req, res) => {
   const userId = decoded.userId;
 
   res.clearCookie("jwt", {
-    httpOnly: true,
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  });
+  res.clearCookie("username", {
+    httpOnly: false,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
   });
   var update = await auth_controller.logout(userId);
   res.redirect("/login");
 });
+
 app.listen(3000, () => {
   console.log("Server running on port 3000");
 });

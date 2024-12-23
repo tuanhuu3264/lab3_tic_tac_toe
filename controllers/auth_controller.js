@@ -9,8 +9,9 @@ exports.login = async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   const { user, token } = await User.login(username, password);
-  const update = await User.updateField(user.id, "is_active", true);
+
   if (user) {
+    const update = await User.updateField(user.id, "is_active", true);
     const payload = {
       userId: user.id,
       username: user.username,
@@ -18,8 +19,8 @@ exports.login = async (req, res) => {
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
     console.log(token);
     console.log(user);
-    return token;
-  }
+    return { token: token, username: user.username };
+  } else return null;
 };
 
 exports.logout = async (id) => {
@@ -45,7 +46,7 @@ exports.register = async (req, res) => {
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
     console.log(token);
     console.log(newUser);
-    return token;
+    return { token: token, username: newUser.username };
   } else throw new Error("Register failed");
 };
 exports.allOnlineUsers = async (req, res) => {

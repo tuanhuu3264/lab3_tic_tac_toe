@@ -24,40 +24,54 @@
 
     <div class="main-container">
         <div class="sidebar">
-            <h3>Online Users</h3>
-            <ul>
-                {{#each onlineUsers}}
-                <li>{{this.username}}</li>
-                {{else}}
-                <li>No users online</li>
-                {{/each}}
-            </ul>
+        <h3>Online Users</h3>
+        <div style="display: flex; flex-direction: column;">
+            {{#each onlineUsers}}
+            <div class="user-item">
+                <img src="{{this.avatar}}" alt="User Avatar" class="avatar">
+                <p class="username">{{this.username}} </p>
+            </div>
+            {{else}}
+            <p>No users online</p>
+            {{/each}}
+        </div>
         </div>
 
         <div class="game-tables">
             <h3>Game Tables</h3>
-            <ul>
+            <div class="tables-list">
                 {{#each gameTables}}
-                <li>Table {{this.id}} - {{#if this.is_playing}}playing{{else}}waiting{{/if}}</li>
+                <div class="table-item">
+                    <div class="table-info">
+                        <p>Table {{this.id}} -
+                            {{#if this.is_playing}}
+                            <span class="status playing">Playing</span>
+                            {{else}}
+                            <span class="status waiting">Waiting</span>
+                            {{/if}}
+                        </p>
+                    </div>
+                </div>
                 {{else}}
-                <li>No tables available</li>
+                <p class="no-tables">No tables available</p>
                 {{/each}}
-            </ul>
+            </div>
         </div>
 
-        <div class="chat-box">
-            <h3>World Chat</h3>
-            <div class="chat-box" id="chat-box">
+
+     <div class="chat-box">
+        <h3>World Chat</h3>
+        <div class="chat-history" id="chat-box">
             {{#each chatMessages}}
-            <p>{this.createdAt}-{{this.username}}: {{this.message}}</p>
+            <p><span class="chat-time">{{this.createdAt}}</span> - <span class="chat-user">{{this.username}}</span>:
+                {{this.message}}</p>
             {{/each}}
-            </div>
-                <textarea id="message" name="message" placeholder="Type a message..." required></textarea>
-                <button id="submit-chat" type="submit">Send</button>
-            <div class="messages">
-               
-            </div>
         </div>
+        <div class="chat-input">
+            <textarea id="message" name="message" placeholder="Type a message..." required></textarea>
+            <button id="submit-chat" type="submit">Send</button>
+        </div>
+     </div>
     </div>
 
     <footer>
@@ -104,15 +118,189 @@ header nav ul li a {
   border: 1px solid #ccc;
 }
 
-.sidebar ul, .game-tables ul {
-  list-style: none;
-  padding: 0;
+.sidebar {
+    padding: 20px;
+    border: 1px solid #ccc;
+    width: 300px;
+    background-color: #f9f9f9;
 }
 
-.chat-box form textarea {
-  width: 100%;
-  height: 100px;
-  margin-bottom: 10px;
+.sidebar h3 {
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #e9ecef;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.username {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.sidebar .user-item:hover {
+    background-color: #d3d3d3;
+}
+
+.sidebar .user-item:last-child {
+    margin-bottom: 0;
+}
+.game-tables {
+    padding: 20px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    height: 400px; 
+}
+
+.game-tables h3 {
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.tables-list {
+    height: 300px;
+    overflow-y: auto; 
+}
+
+.game-tables .table-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.game-tables .table-item:last-child {
+    border-bottom: none;
+}
+
+.game-tables .table-info {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+}
+
+.game-tables .status {
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.game-tables .status.playing {
+    color: green;
+}
+
+.game-tables .status.waiting {
+    color: orange;
+}
+
+.game-tables .no-tables {
+    padding: 10px;
+    color: #888;
+    font-style: italic;
+}
+
+.game-tables li:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+
+.chat-box {
+    padding: 20px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    width: 350px;
+    height: 450px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.chat-box h3 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.chat-history {
+    flex-grow: 1;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #333;
+}
+
+.chat-history p {
+    margin: 5px 0;
+    padding: 3px;
+}
+
+.chat-history .chat-time {
+    font-size: 12px;
+    color: #999;
+}
+
+.chat-history .chat-user {
+    font-weight: bold;
+    color: #0066cc;
+}
+
+.chat-input {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chat-input textarea {
+    width: 100%;
+    height: 60px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    color: #333;
+    resize: none;
+}
+
+.chat-input button {
+    align-self: flex-end;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.chat-input button:hover {
+    background-color: #0056b3;
+}
+
+.chat-input button:disabled {
+    background-color: #bbb;
+    cursor: not-allowed;
 }
 
 footer {

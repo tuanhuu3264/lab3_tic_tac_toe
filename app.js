@@ -55,7 +55,7 @@ app.get("/login", (req, res) => {
 app.post("/login", async (req, res) => {
   var { token, username } = await auth_controller.login(req, res);
   if (token) {
-    res.cookie("username", token, {
+    res.cookie("jwt", token, {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
@@ -74,6 +74,20 @@ app.post("/login", async (req, res) => {
 });
 app.get("/register", (req, res) => {
   res.render("tie_tac_toe/register");
+});
+app.get("/profile", async (req, res) => {
+  var user = await auth_controller.getByUsername(req, res);
+  if (!user) {
+    res.redirect("/login");
+  }
+  res.render("tie_tac_toe/profile", { user: user });
+});
+app.post("/profile", async (req, res) => {
+  var user = await auth_controller.updateProfile(req, res);
+  if (!user) {
+    res.redirect("/login");
+  }
+  res.render("tie_tac_toe/profile", { user: user });
 });
 app.post("/register", async (req, res) => {
   var { token, username } = await auth_controller.register(req, res);

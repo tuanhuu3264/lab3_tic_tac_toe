@@ -49,7 +49,36 @@ exports.register = async (req, res) => {
     return { token: token, username: newUser.username };
   } else throw new Error("Register failed");
 };
+exports.getByUsername = async (req, res) => {
+  const username = req.cookies?.username;
+  console.log(username);
+  if (!username) {
+    return null;
+  }
+  const user = await User.getUserByUserName(username);
+  console.log(user);
+  if (!user) return null;
+  return user;
+};
 exports.allOnlineUsers = async (req, res) => {
   const users = await User.getAllActivedUsers();
   return users;
+};
+exports.updateProfile = async (req, res) => {
+  const avatar = req.body.avatar;
+  const fullname = req.body.fullname;
+  const username = req.cookies?.username;
+  const updateAvatar = await User.updateFieldByUsername(
+    username,
+    "avatar",
+    avatar
+  );
+  if (!updateAvatar) return null;
+  const updateFullname = await User.updateFieldByUsername(
+    username,
+    "fullname",
+    fullname
+  );
+  if (!updateFullname) return null;
+  return updateFullname;
 };

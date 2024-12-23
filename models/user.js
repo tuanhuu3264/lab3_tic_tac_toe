@@ -8,7 +8,24 @@ class User {
     this.fullname = fullname;
     this.password = password;
   }
+  static async getUserByUserName(username) {
+    const query = {
+      text: 'SELECT * FROM "User" WHERE "username" = $1',
+      values: [username],
+    };
 
+    try {
+      const { rows } = await pool.query(query);
+
+      if (rows.length === 0) {
+        return null;
+      }
+      return rows[0];
+    } catch (err) {
+      console.error("Error executing query", err.stack);
+      throw new Error("Login failed");
+    }
+  }
   static async login(username, password) {
     const query = {
       text: 'SELECT * FROM "User" WHERE "username" = $1 AND "password" = $2',
@@ -144,6 +161,28 @@ class User {
     } catch (err) {
       console.error("Error executing query", err.stack);
       throw new Error("Login failed");
+    }
+  }
+  static async updateFieldByUsername(username, fieldName, newValue) {
+    try {
+      const query = `
+      UPDATE "User"
+      SET "${fieldName}" = $1
+      WHERE "username" = $2
+      RETURNING *;
+    `;
+      const result = await pool.query(query, [newValue, username]);
+
+      if (result.rowCount > 0) {
+        console.log("Successfully update", result.rows[0]);
+        return result.rows[0];
+      } else {
+        console.log("Not found id:", id);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error executing query:", error.message);
+      throw error;
     }
   }
 }

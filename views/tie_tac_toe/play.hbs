@@ -395,6 +395,10 @@
         messageField.value = '';
         messageField.focus();
     }
+       sendBtn.addEventListener('click', function (event) {
+            event.preventDefault();
+            sendMessage();
+        });
 
     function sendReady() {
             if (ws.readyState === WebSocket.OPEN) {
